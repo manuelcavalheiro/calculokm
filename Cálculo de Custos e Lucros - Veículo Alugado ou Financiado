@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Custos e Lucros - Veículo Alugado ou Financiado</title>
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cálculo de Custos e Lucros - Veículo Alugado ou Financiado</h1>
+    <form id="calcForm">
+        <label for="tipoVeiculo">Tipo de veículo:</label>
+        <select id="tipoVeiculo" onchange="mostrarCampos()">
+            <option value="">Selecione</option>
+            <option value="alugado">Alugado</option>
+            <option value="financiado">Financiado</option>
+        </select><br><br>
+        
+        <div id="comum">
+            <label for="consumoVeiculo">Consumo do veículo (km/l):</label>
+            <input type="number" id="consumoVeiculo" step="0.01" required><br><br>
+            
+            <label for="precoCombustivel">Preço do combustível (R$/litro):</label>
+            <input type="number" id="precoCombustivel" step="0.01" required><br><br>
+            
+            <label for="diasSemanaTrabalhados">Dias na semana trabalhados:</label>
+            <input type="number" id="diasSemanaTrabalhados" required><br><br>
+            
+            <label for="kmRodadosDia">Km rodados em um dia:</label>
+            <input type="number" id="kmRodadosDia" step="0.01" required><br><br>
+            
+            <label for="metaLucroMensal">Meta de lucro mensal (R$):</label>
+            <input type="number" id="metaLucroMensal" step="0.01" required><br><br>
+        </div>
+
+        <div id="alugado" class="hidden">
+            <label for="aluguelVeiculo">Aluguel do veículo (R$):</label>
+            <input type="number" id="aluguelVeiculo" step="0.01"><br><br>
+        </div>
+        
+        <div id="financiado" class="hidden">
+            <label for="custoFinanciamento">Custo do financiamento mensal (R$):</label>
+            <input type="number" id="custoFinanciamento" step="0.01"><br><br>
+            
+            <label for="custoSeguro">Custo do seguro mensal (R$):</label>
+            <input type="number" id="custoSeguro" step="0.01"><br><br>
+            
+            <label for="custoOleo">Custo da troca de óleo (R$):</label>
+            <input type="number" id="custoOleo" step="0.01"><br><br>
+            
+            <label for="kmTrocaOleo">Km para troca de óleo:</label>
+            <input type="number" id="kmTrocaOleo"><br><br>
+            
+            <label for="custoPneus">Custo da troca de pneus (R$):</label>
+            <input type="number" id="custoPneus" step="0.01"><br><br>
+            
+            <label for="kmTrocaPneus">Km para troca de pneus:</label>
+            <input type="number" id="kmTrocaPneus"><br><br>
+        </div>
+        
+        <button type="button" onclick="calcular()">Calcular</button>
+    </form>
+    
+    <h2>Resultados:</h2>
+    <p id="resultados"></p>
+    
+    <script>
+        function mostrarCampos() {
+            var tipoVeiculo = document.getElementById("tipoVeiculo").value;
+            document.getElementById("alugado").classList.add("hidden");
+            document.getElementById("financiado").classList.add("hidden");
+
+            if (tipoVeiculo === "alugado") {
+                document.getElementById("alugado").classList.remove("hidden");
+            } else if (tipoVeiculo === "financiado") {
+                document.getElementById("financiado").classList.remove("hidden");
+            }
+        }
+
+        function calcular() {
+            var tipoVeiculo = document.getElementById("tipoVeiculo").value;
+            var consumoVeiculo = parseFloat(document.getElementById("consumoVeiculo").value);
+            var precoCombustivel = parseFloat(document.getElementById("precoCombustivel").value);
+            var diasSemanaTrabalhados = parseInt(document.getElementById("diasSemanaTrabalhados").value);
+            var kmRodadosDia = parseFloat(document.getElementById("kmRodadosDia").value);
+            var metaLucroMensal = parseFloat(document.getElementById("metaLucroMensal").value);
+
+            var kmSemana = kmRodadosDia * diasSemanaTrabalhados;
+            var litrosCombustivelSemana = kmSemana / consumoVeiculo;
+            var custoCombustivelSemana = litrosCombustivelSemana * precoCombustivel;
+
+            var lucroSemanalDesejado = metaLucroMensal / 4;
+            var valorKm, lucroLiquidoMensal, saldoSemanalNecessario;
+
+            if (tipoVeiculo === "alugado") {
+                var aluguelVeiculo = parseFloat(document.getElementById("aluguelVeiculo").value);
+                var custoPorKmCombustivel = precoCombustivel / consumoVeiculo;
+                var custoPorKmAluguel = aluguelVeiculo / kmSemana;
+                saldoSemanalNecessario = lucroSemanalDesejado + (custoCombustivelSemana + aluguelVeiculo);
+                valorKm = saldoSemanalNecessario / kmSemana;
+                lucroLiquidoMensal = (valorKm * kmSemana * 4) - (custoCombustivelSemana * 4 + aluguelVeiculo * 4);
+
+            } else if (tipoVeiculo === "financiado") {
+                var custoFinanciamento = parseFloat(document.getElementById("custoFinanciamento").value);
+                var custoSeguro = parseFloat(document.getElementById("custoSeguro").value);
+                var custoOleo = parseFloat(document.getElementById("custoOleo").value);
+                var kmTrocaOleo = parseInt(document.getElementById("kmTrocaOleo").value);
+                var custoPneus = parseFloat(document.getElementById("custoPneus").value);
+                var kmTrocaPneus = parseInt(document.getElementById("kmTrocaPneus").value);
+
+                var custoPorKmCombustivel = precoCombustivel / consumoVeiculo;
+                var custoPorKmOleo = custoOleo / kmTrocaOleo;
+                var custoPorKmPneus = custoPneus / kmTrocaPneus;
+                var custoFinanciamentoSemana = custoFinanciamento / 4;
+                var custoSeguroSemana = custoSeguro / 4;
+                var custoPorKmTotal = custoPorKmCombustivel + custoPorKmOleo + custoPorKmPneus;
+                var custoSemanalTotal = (custoPorKmTotal * kmSemana) + custoFinanciamentoSemana + custoSeguroSemana;
+                saldoSemanalNecessario = custoSemanalTotal + lucroSemanalDesejado;
+                valorKm = saldoSemanalNecessario / kmSemana;
+                lucroLiquidoMensal = (valorKm * kmSemana * 4) - (custoSemanalTotal * 4);
+            }
+
+            var resultados = "Km rodados por dia: " + kmRodadosDia + "<br>" +
+                             "Dias trabalhados por semana: " + diasSemanaTrabalhados + "<br>" +
+                             "Valor do km: R$ " + valorKm.toFixed(2) + "<br>" +
+                             "Lucro líquido no mês: R$ " + lucroLiquidoMensal.toFixed(2);
+            document.getElementById("resultados").innerHTML = resultados;
+        }
+    </script>
+</body>
+</html>
